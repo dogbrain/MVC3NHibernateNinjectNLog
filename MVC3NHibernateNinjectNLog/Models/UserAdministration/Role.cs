@@ -16,6 +16,11 @@ namespace MVC3NHibernateNinjectNLog.Models
 
         public virtual string Description { get; set; }
 
-        public virtual ICollection<User> Users { get; set; }
+         public virtual IList<User> UsersInRole { get; set; }
+
+        public Role()
+        {
+            UsersInRole = new List<User>();
+        }
     }
 }

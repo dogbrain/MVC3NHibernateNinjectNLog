@@ -10,6 +10,8 @@ using FluentNHibernate.Cfg;
 using MVC3NHibernateNinjectNLog.Models;
 using System.Web.Mvc;
 using System.Web.Security;
+using System.IO;
+using System.Reflection;
 
 namespace MVC3NHibernateNinjectNLog.Infastructure.Data
 {
@@ -50,18 +52,7 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Data
 
             CurrentSessionContext.Bind(session);
 
-            switch (System.Configuration.ConfigurationManager.AppSettings["Environment"].ToString())
-            {
-
-                case "Development":
-                    MembershipCreateStatus createStatus;
-              
-                    System.Web.Security.Membership.CreateUser("user", "123456", "user@userland.com", null, null, true, null, out createStatus);
-                    System.Web.Security.Membership.CreateUser("admin", "123456", "admin@userland.com", null, null, true, null, out createStatus);
-                    Roles.CreateRole("Admin");
-                    Roles.AddUserToRole("admin", "Admin");
-                    break;
-            }
+    
         }
 
         // Unbinds the session, commits the transaction, and closes the session
@@ -93,10 +84,10 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Data
 
 
         // Returns our NHibernate session factory
-        private static ISessionFactory CreateSessionFactory()
+        internal   static ISessionFactory CreateSessionFactory()
         {
             //var mappings = CreateMappings();
-
+            string fn = AppDomain.CurrentDomain.BaseDirectory;
             string configFile = HttpContext.Current.Server.MapPath("hibernate.cfg.xml");
             Configuration normalConfig = new Configuration().Configure(configFile);
 
@@ -142,6 +133,38 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Data
 
             //
 
+        }
+
+
+        internal static void InsertDataFixtures()
+        {
+            switch (System.Configuration.ConfigurationManager.AppSettings["Environment"].ToString())
+            {
+
+                case "Development":
+                    try
+                    {
+                        //If there are no users.. go ahead
+                        BeginRequest(null, new EventArgs());
+                        if (Membership.GetAllUsers().Count == 0)
+                        {
+
+
+                            MembershipCreateStatus createStatus;
+
+                            System.Web.Security.Membership.CreateUser("user", "123456", "user@userland.com", null, null, true, null, out createStatus);
+                            System.Web.Security.Membership.CreateUser("admin", "123456", "admin@userland.com", null, null, true, null, out createStatus);
+                            Roles.CreateRole("Admin");
+                            Roles.AddUserToRole("admin", "Admin");
+
+                        }
+                    }
+                    finally
+                    {
+                        EndRequest(null, new EventArgs());
+                    }
+                    break;
+            }
         }
     }
 }

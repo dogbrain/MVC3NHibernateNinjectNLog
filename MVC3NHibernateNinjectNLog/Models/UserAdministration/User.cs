@@ -39,11 +39,24 @@ namespace MVC3NHibernateNinjectNLog.Models
         public virtual String PasswordVerificationToken { get; set; }
         public virtual DateTime? PasswordVerificationTokenExpirationDate { get; set; }
 
-        public virtual ICollection<Role> Roles { get; set; }
+        public virtual IList<Role> Roles { get; set; }
 
         public User()
         {
             Roles = new List<Role>();
         }
+
+        public virtual void AddRole(Role role)
+        {
+            role.UsersInRole.Add(this);
+            Roles.Add(role);
+        }
+
+        public virtual void RemoveRole(Role role)
+        {
+            role.UsersInRole.Remove(this);
+            Roles.Remove(role);
+        }
+
     }
 }

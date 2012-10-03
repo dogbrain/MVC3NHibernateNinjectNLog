@@ -7,6 +7,7 @@ using MVC3NHibernateNinjectNLog.Infastructure.Data;
 using MVC3NHibernateNinjectNLog.Models;
 using System.Web.Mvc;
 using System.Web.Security;
+using System.Configuration.Provider;
 
 namespace MVC3NHibernateNinjectNLog.Infastructure.Providers
 {
@@ -96,7 +97,7 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Providers
             Role = RoleRepository.GetAll().FirstOrDefault(Rl => Rl.RoleName == roleName);
             if (Role != null)
             {
-                return Role.Users.Select(Usr => Usr.Username).ToArray();
+                return Role.UsersInRole.Select(Usr => Usr.Username).ToArray();
             }
             else
             {
@@ -137,7 +138,7 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Providers
             }
 
 
-            return (from Rl in RoleRepository.GetAll() from Usr in Rl.Users where Rl.RoleName == roleName && Usr.Username.Contains(usernameToMatch) select Usr.Username).ToArray();
+            return (from Rl in RoleRepository.GetAll() from Usr in Rl.UsersInRole where Rl.RoleName == roleName && Usr.Username.Contains(usernameToMatch) select Usr.Username).ToArray();
 
         }
 
@@ -175,14 +176,14 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Providers
             }
             if (throwOnPopulatedRole)
             {
-                if (Role.Users.Any())
+                if (Role.UsersInRole.Any())
                 {
                     return false;
                 }
             }
             else
             {
-                Role.Users.Clear();
+                Role.UsersInRole.Clear();
             }
             RoleRepository.Delete(Role);
             return true;
@@ -191,6 +192,26 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Providers
 
         public override void AddUsersToRoles(string[] usernames, string[] roleNames)
         {
+
+            
+            foreach (string rolename in roleNames)
+            {
+                if (!RoleExists(rolename))
+                    throw new ProviderException(String.Format("Role name {0} not found.", rolename));
+            }
+
+            foreach (string username in usernames)
+            {
+                if (username.Contains(","))
+                    throw new ArgumentException(String.Format("User names {0} cannot contain commas.", username));
+                //is user not exiting //throw exception
+
+                foreach (string rolename in roleNames)
+                {
+                    if (IsUserInRole(username, rolename))
+                        throw new ProviderException(String.Format("User {0} is already in role {1}.", username, rolename));
+                }
+            }
             List<User> Users = UserRepository.GetAll().Where(Usr => usernames.Contains(Usr.Username)).ToList();
             List<Role> Roles = RoleRepository.GetAll().Where(Rl => roleNames.Contains(Rl.RoleName)).ToList();
             foreach (User user in Users)
@@ -201,6 +222,7 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Providers
                     {
                         user.Roles.Add(role);
                         UserRepository.SaveOrUpdate(user);
+                        RoleRepository.SaveOrUpdate(role);
                     }
                 }
             }

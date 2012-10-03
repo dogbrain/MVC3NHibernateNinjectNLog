@@ -5,6 +5,9 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Security;
+using NHibernate;
+using MVC3NHibernateNinjectNLog.Infastructure.Data;
+using NHibernate.Context;
 
 namespace MVC3NHibernateNinjectNLog
 {
@@ -36,6 +39,7 @@ namespace MVC3NHibernateNinjectNLog
 
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
+            NHibernateSessionPerRequest.InsertDataFixtures();
             
         }
 

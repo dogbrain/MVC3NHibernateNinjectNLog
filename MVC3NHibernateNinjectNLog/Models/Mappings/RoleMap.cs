@@ -13,7 +13,10 @@ namespace MVC3NHibernateNinjectNLog.Models.Mappings
             Id(x => x.RoleId);
             Map(x => x.RoleName);
             Map(x => x.Description);
-            HasManyToMany<User>(m => m.Users).Cascade.SaveUpdate().AsBag();
+            HasManyToMany(x => x.UsersInRole)
+            .Cascade.All()
+            .Inverse()
+            .Table("UsersInRoles");
         }
     }
 }

@@ -235,7 +235,8 @@ namespace MVC3NHibernateNinjectNLog.Infastructure.Providers
                     User.LastActivityDate = DateTime.UtcNow;
                     UserRepository.SaveOrUpdate(User);
                 }
-                return new MembershipUser(System.Web.Security.Membership.Provider.Name, User.Username, User.UserId, User.Email, null, null, User.IsApproved, User.IsLockedOut, User.CreateDate.Value, User.LastLoginDate.Value, User.LastActivityDate.Value, User.LastPasswordChangedDate.Value, User.LastLockoutDate.Value);
+
+                return new MembershipUser(System.Web.Security.Membership.Provider.Name, User.Username, User.UserId, User.Email, null , User.Comment, User.IsApproved, User.IsLockedOut, User.CreateDate.Value, User.LastLoginDate.Value, User.LastActivityDate.Value, User.LastPasswordChangedDate.Value, User.LastLockoutDate.Value);
             }
             else
             {

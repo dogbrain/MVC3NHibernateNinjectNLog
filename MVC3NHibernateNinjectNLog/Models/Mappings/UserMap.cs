@@ -32,7 +32,9 @@ namespace MVC3NHibernateNinjectNLog.Models.Mappings
             Map(x => x.PasswordVerificationToken);
             Map(x => x.PasswordVerificationTokenExpirationDate);
 
-            HasManyToMany<Role>(m => m.Roles).Cascade.SaveUpdate().Inverse().AsBag();
+            HasManyToMany(x => x.Roles)
+                    .Cascade.All()
+                    .Table("UsersInRoles");
         }
     }
 }
